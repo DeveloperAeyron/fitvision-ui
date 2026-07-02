@@ -16,8 +16,13 @@ const EXERCISE_LABELS: Record<Exercise, string> = {
   situp: "Sit-up",
 };
 
+function normalizeBase64(base64: string): string {
+  const trimmed = base64.trim();
+  return trimmed.includes(",") ? trimmed.split(",")[1]! : trimmed;
+}
+
 function base64ToObjectUrl(base64: string, mime = "video/mp4"): string {
-  const binary = atob(base64);
+  const binary = atob(normalizeBase64(base64));
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
@@ -29,10 +34,12 @@ function VideoPanel({
   label,
   src,
   badge,
+  onError,
 }: {
   label: string;
   src: string | null;
   badge?: string;
+  onError?: () => void;
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
@@ -49,9 +56,12 @@ function VideoPanel({
       <div className="relative flex flex-1 items-center justify-center bg-black">
         {src ? (
           <video
+            key={src}
             src={src}
             controls
             playsInline
+            preload="auto"
+            onError={onError}
             className="max-h-[420px] w-full object-contain"
           />
         ) : (
@@ -86,6 +96,7 @@ export default function RepCounterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CountRepsResponse | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   const previewUrl = useMemo(
     () => (file ? URL.createObjectURL(file) : null),
@@ -119,6 +130,7 @@ export default function RepCounterForm() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setVideoError(null);
 
     try {
       const videoBase64 = await fileToBase64(file);
@@ -186,6 +198,7 @@ export default function RepCounterForm() {
                   setFile(selected);
                   setResult(null);
                   setError(null);
+                  setVideoError(null);
                 }}
               />
               {file ? (
@@ -324,6 +337,12 @@ export default function RepCounterForm() {
               </div>
             )}
 
+            {videoError && (
+              <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                {videoError}
+              </p>
+            )}
+
             {hasComparison ? (
               <div className="grid min-h-[420px] flex-1 gap-4 sm:grid-cols-2">
                 <VideoPanel label="Original" src={previewUrl} />
@@ -331,6 +350,11 @@ export default function RepCounterForm() {
                   label="Annotated"
                   src={annotatedUrl}
                   badge={`${result!.reps} reps`}
+                  onError={() =>
+                    setVideoError(
+                      "Annotated video couldn't play in the browser. Try Download annotated — if that file works, restart the backend so it re-encodes to H.264.",
+                    )
+                  }
                 />
               </div>
             ) : (
