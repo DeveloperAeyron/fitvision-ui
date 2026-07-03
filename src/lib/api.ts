@@ -10,7 +10,9 @@ export interface CountRepsResponse {
   video: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://junior-preachy-defeat.ngrok-free.dev";
 
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
