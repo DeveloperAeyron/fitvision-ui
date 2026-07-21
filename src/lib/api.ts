@@ -1,4 +1,4 @@
-export const EXERCISES = ["pushup", "squat", "situp"] as const;
+export const EXERCISES = ["pushup", "pullup", "squat", "jumpingjack", "plank", "situp", "lunge"] as const;
 export type Exercise = (typeof EXERCISES)[number];
 
 export type Backend = "tflite" | "mediapipe";

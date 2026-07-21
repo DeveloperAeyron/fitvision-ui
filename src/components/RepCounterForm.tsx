@@ -12,8 +12,12 @@ import {
 
 const EXERCISE_LABELS: Record<Exercise, string> = {
   pushup: "Push-up",
+  pullup: "Pull-up",
   squat: "Squat",
+  jumpingjack: "Jumping Jack",
+  plank: "Plank",
   situp: "Sit-up",
+  lunge: "Lunge",
 };
 
 function normalizeBase64(base64: string): string {
